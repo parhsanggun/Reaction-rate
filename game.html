@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="My Parse App">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+
+    <script type="text/javascript" src="https://npmcdn.com/parse@2.1.0/dist/parse.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <title>ReactionGame</title>
+    <style>
+     .box{
+         background-color:red;
+         height: 100px;
+         width: 100px;
+         display: none;
+         position: relative;
+     }
+     .show{
+            width:120px;
+            height: 50px;
+
+     }
+    </style>
+</head>
+<body>
+    <div id="info">
+      <span id="id"></span>
+      <input type="button" value="LOGOUT" onclick="logout()">
+      <span id="pscore"></span>
+   </div>
+    <button id=Start>StartGame</button>
+    <div class="show">
+            <h4>Score = 0</br>
+            Times = 10 </h4>
+    </div>
+    <div class="box">
+    </div>
+
+
+
+    <script type="text/javascript">
+        Parse.initialize("madcage42"); 
+      Parse.serverURL='https://madcage273.herokuapp.com/parse'
+
+      $(document).ready(function(){
+         if(!Parse.User.current()){
+            alert("Please after Login");
+            window.location = "signin.html"
+         }
+         else {
+            $("#id").html("Welcome! " + Parse.User.current().get("username") + " ");
+           
+            $("#pscore").html("best score : " + Parse.User.current().get("score") + " ");
+
+         }
+      });
+        function logout(){
+          Parse.User.logOut();
+          window.location = "signin.html";
+       }
+        var startTime; var nowTime; var runTime; 
+        var times;
+        var score = 0;
+        $("#Start").click(function(){
+            startTime=Date.now()+10000;
+            times=0;
+            $(".show").html("<h4>Score = "+times+"</br>Times = 10</h4>");
+            makebox();
+        });
+
+        function makebox(){
+            setTimeout(function(){
+                var left=Math.random();
+                left=left*($(window).width()-100);
+                var top=Math.random();
+                top=top*($(window).height()-200);
+                $(".box").css("top",top);
+                $(".box").css("left",left);
+                $(".box").css("display","block"); 
+            },200);
+        }
+        
+
+        $(".box").click(function(){
+            nowTime=Date.now();
+            runTime=(startTime-nowTime)/1000;
+            if(runTime>0){
+                $(this).css("display","none"); 
+                times+=1;
+                $(".show").html("<h4>Score = "+times+"</br>Times = "+runTime+"</h4>");
+                makebox();
+            }else{
+                score = times;
+                alert("Game Over!!");
+                alert("your score : " + score);
+                
+                if(Parse.User.current().get("score")==0){
+                    Parse.User.current().set("score",score);
+                    Parse.User.current().save();
+                }
+                if(Parse.User.current().get("score") < score){
+                    Parse.User.current().set("score",score);
+                    Parse.User.current().save();
+                }
+                alert("your bestscore : " + Parse.User.current().get("score"));
+            }
+        });
+        
+    </script>
+</body>
+
+</html>
